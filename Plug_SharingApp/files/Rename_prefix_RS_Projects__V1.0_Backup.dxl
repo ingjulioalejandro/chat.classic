@@ -1,0 +1,97 @@
+/** History: 
+
+Vers	Who	YY/MM/DD	What
+
+v1.0	MLI	21/10/07	Creation
+
+*/
+
+pragma runLim, 0
+
+//__________________________________ INCLUDES ___________________________________
+// the following module shall be included :
+
+//__________________________________ CONSTANTS __________________________________
+
+//__________________________________ VARIABLES __________________________________
+
+
+string g_script_name = "Rename RS Projects" // script name for log name too
+
+// Variables that never change during the lifetime of the script
+Module g_iniMod = current // initial Module when the script starts
+Object g_iniObj = current // initial Object when the script starts
+Project g_iniProj = current // initial Project when the script starts, it can be null
+Folder g_iniFold = current // initial Folder when the script starts, is is never
+// Variables that can change during the lifetime of the script
+Module g_curMod = current // current Module in the lifetime of the script (can be updated)
+Object g_curObj = current // current Object in the lifetime of the script (can be updated)
+Project g_curProj = current // current Project when the script starts, it can be null
+Folder g_curFold = current // current Folder when the script starts, is is never null. Note that the fullName of the root folder is = "/"
+
+// ----- DBE -----
+DB g_db = null
+
+DBE g_dbe_field_currentProject = null // created in doGui()
+string g_val_field_currentProject = "" 
+
+DBE g_dbe_field_new_ProjectName = null // created in doGui()
+string g_val_field_new_ProjectName = "" 
+
+DBE g_dbe_listReplace = null
+string g_val_listReplace = ""
+
+bool g_isRSProject = false
+
+
+void getSettings(){
+
+	if(!null g_dbe_field_currentProject) g_val_field_currentProject = get(g_dbe_field_currentProject)""
+	if(!null g_dbe_field_new_ProjectName) g_val_field_new_ProjectName = get(g_dbe_field_new_ProjectName)""
+	if(!null g_dbe_listReplace) g_val_listReplace = get(g_dbe_listReplace)""
+	print g_val_field_currentProject " g_val_field_currentProject \n"
+	print g_val_field_new_ProjectName " g_val_field_new_ProjectName \n"
+	print g_val_listReplace " g_val_listReplace \n"
+}
+
+void doRename_(DB dbi){
+
+	getSettings()
+
+}
+
+void doGui(int widthi, int heighti){
+	
+	string place = fullName(g_iniFold)
+	
+	g_db = topMost(g_script_name " - " g_val_field_currentProject)
+
+	
+	g_dbe_field_currentProject = field(g_db, "Current Project", g_val_field_currentProject, 70, true)
+
+	g_dbe_field_new_ProjectName = field(g_db, "New Project Name", g_val_field_new_ProjectName"", 70, false)
+	
+	
+	g_dbe_listReplace = text(g_db, "Target Items", g_val_listReplace, 400, 300, false)
+	
+	// ------------------------------------
+
+	DBE g_dbe_apply = apply(g_db, "Rename RS Project", doRename_)
+	if(!g_isRSProject) inactive g_dbe_apply
+	// ------------------------------------
+	realize g_db
+	
+	show g_db
+}
+
+void doMain(){ // Initialize global variables for DBEs + run GUI
+	// Run from: /Test_Range L2 Subsystem Level Specifications 1
+	int pos = 0
+
+	g_val_field_currentProject = name g_iniProj ""
+	g_val_field_new_ProjectName = name g_iniProj ""
+		
+	doGui(1000, 400)
+}
+
+doMain()
